@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+///////////////////////
+// ENUMS
+///////////////////////
+
+enum Role {
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+enum MemberStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentMethod {
+  ORANGE_MONEY
+  MTN_MOMO
+  MOOV_MONEY
+  WAVE
+  CASH
+  BANK
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum PaymentType {
+  COTISATION
+  DON
+  CARTE
+  SERVICE
+}
+
+enum CardStatus {
+  EN_ATTENTE
+  VALIDEE
+  REJETEE
+}
+
+///////////////////////
+// USER
+///////////////////////
+
+model User {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  firstName   String
+  lastName    String?
+  number      String   @unique
+  email       String?
+  photo       String?
+
+  city        String?
+  address     String?
+  sex         String?
+
+  role        Role     @default(MEMBER)
+  occupation  String?
+  entreprise  String?
+
+  // infos supplémentaires frontend
+  etablissement String?
+  niveau        String?
+  filiere       String?
+  matricule     String?
+
+  document      String?
+
+  section       String?
+
+  // statut membre
+  isMember      Boolean  @default(false)
+  memberStatus  MemberStatus @default(PENDING)
+  numeroMembre  String?
+  certifie      Boolean  @default(false)
+
+  // auth
+  password      String?
+  isVerify      Boolean  @default(false)
+  havePass      Boolean  @default(false)
+
+  // relations
+  payments      Payment[]
+  memberCard    MemberCard?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+///////////////////////
+// MEMBER CARD
+///////////////////////
+
+model MemberCard {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId      String     @db.ObjectId @unique
+  user        User       @relation(fields: [userId], references: [id])
+
+  status      CardStatus @default(EN_ATTENTE)
+  demandeDate DateTime   @default(now())
+}
+
+///////////////////////
+// PAYMENT
+///////////////////////
+
+model Payment {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId      String?       @db.ObjectId
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  name        String?       // correspond à frontend "name"
+  phoneNumber String        // correspond à "number"
+
+  amount      Int
+  type        PaymentType
+  method      PaymentMethod
+
+  description String?
+
+  status      PaymentStatus @default(SUCCESS)
+
+  createdAt   DateTime      @default(now())
+}
+
+///////////////////////
+// EXPENSE AEEY
+///////////////////////
+
+model Expense {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  name        String   // frontend "name"
+  phoneNumber String   // frontend "number"
+
+  description String
+  amount      Int
+
+  method      PaymentMethod
+
+  createdAt   DateTime @default(now())
+}
