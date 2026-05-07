@@ -20,6 +20,9 @@ app.use("/user",  userRoutes)
 const authRoutes = require("./routes/auth.routes")
 app.use("/auth", authRoutes) 
 
+const eventRoutes = require("./routes/event.route")
+app.use("/event", eventRoutes) 
+
 const port = process.env.PORT || 9000
 app.listen(port, () => {
     console.log(`le server tourne sur le port: http://localhost:${port}`)

@@ -17,6 +17,7 @@ module.exports = {
         data: {
           firstName: data.firstName,
           number: data.number,
+          memberStatus: "NONE"
         },
       });
       return user;

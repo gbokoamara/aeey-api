@@ -59,4 +59,40 @@ const register = (req, res) => {
   res.send("enregistrement en cours ...");
 };
 
-module.exports = { update, register };
+const memberRequest = async (req, res) => {
+  logData("req.body.cardData", req.body.cardData)
+  let cardData = req.body.cardData
+  logData("cardData", cardData)
+
+  const {id} = req.params
+  try {
+    const updatePayload = {
+            firstName: cardData.firstName,
+            lastName: cardData.lastName,
+            number: cardData.telephone, // Mapping: telephone -> number
+            email: cardData.email,
+            city: cardData.city,
+            address: cardData.address,
+            sex: cardData.sex,
+            occupation: cardData.occupation,
+            entreprise: cardData.entreprise,
+            etablissement: cardData.etablissement,
+            niveau: cardData.niveau,
+            filiere: cardData.filiere,
+            matricule: cardData.matricule,
+            section: cardData.section,
+            birthDate: cardData.dateNaissance ? new Date(cardData.dateNaissance) : null,
+            memberStatus: "PENDING",
+            isMember: true,
+            certifie: cardData.certifie,
+            // document: cardData.document, // Attention: Prisma attend un String pour document, vérifie le format
+        };
+    const member = await userModel.update(id, updatePayload)
+    res.status(200).json({message:"demande effectuée avec succès !", member})
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la demande d'adhésion" });
+  }
+};
+
+module.exports = { update, register, memberRequest };

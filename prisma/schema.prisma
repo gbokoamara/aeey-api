@@ -19,6 +19,7 @@ enum Role {
 }
 
 enum MemberStatus {
+  NONE         
   PENDING
   APPROVED
   REJECTED
@@ -52,6 +53,15 @@ enum CardStatus {
   REJETEE
 }
 
+enum EventStatus {
+  DRAFT        // en cours de création (visible "En cours")
+  SCHEDULED    // programmé (date fixée)
+  ACTIVE       // en cours maintenant
+  COMPLETED    // passé
+  CANCELLED    // désactivé / annulé
+  POSTPONED    // reporté
+}
+
 ///////////////////////
 // USER
 ///////////////////////
@@ -82,6 +92,7 @@ model User {
   document      String?
 
   section       String?
+  birthDate     DateTime?
 
   // statut membre
   isMember      Boolean  @default(false)
@@ -156,4 +167,31 @@ model Expense {
   method      PaymentMethod
 
   createdAt   DateTime @default(now())
+}
+
+///////////////////////
+// EVENEMENT AEEY
+///////////////////////
+
+model Event {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  title       String
+  description String?
+
+  location    String?
+  date        DateTime?
+
+  image       String?
+
+  status      EventStatus @default(DRAFT) // par défaut "en cours"
+
+  // utile pour reprogrammation
+  previousDate DateTime?
+  rescheduledAt DateTime?
+
+  isPublished Boolean @default(false) // visible au public ou pas
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime? @updatedAt
 }
