@@ -22,6 +22,9 @@ const update = async (req, res) => {
     matricule,
     document,
     section,
+    poste,
+    memberType, 
+    profession,
   } = req.body.updateDate;
 
   const { id } = req.params;
@@ -46,6 +49,9 @@ const update = async (req, res) => {
       matricule: matricule,
       document: JSON.stringify(document),
       section: section,
+      poste: poste,
+      memberType:  memberType,
+      profession: profession,
     });
     logData("updatedUser", updatedUser)
 
@@ -85,6 +91,9 @@ const memberRequest = async (req, res) => {
             memberStatus: "PENDING",
             isMember: true,
             certifie: cardData.certifie,
+            poste: cardData.poste,
+            memberType: cardData.memberType,
+            profession: cardData.profession,
             // document: cardData.document, // Attention: Prisma attend un String pour document, vérifie le format
         };
     const member = await userModel.update(id, updatePayload)

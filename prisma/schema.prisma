@@ -25,6 +25,13 @@ enum MemberStatus {
   REJECTED
 }
 
+enum MemberType {
+  ELEVE
+  ETUDIANT
+  PROFESSIONNEL
+  MEMBRE
+}
+
 enum PaymentMethod {
   ORANGE_MONEY
   MTN_MOMO
@@ -42,6 +49,7 @@ enum PaymentStatus {
 
 enum PaymentType {
   COTISATION
+  COTISATION_TIERCE
   DON
   CARTE
   SERVICE
@@ -80,6 +88,7 @@ model User {
   sex         String?
 
   role        Role     @default(MEMBER)
+  profession  String?
   occupation  String?
   entreprise  String?
 
@@ -98,6 +107,8 @@ model User {
   isMember      Boolean  @default(false)
   memberStatus  MemberStatus @default(PENDING)
   numeroMembre  String?
+  memberType  MemberType?
+  poste       String?
   certifie      Boolean  @default(false)
 
   // auth
@@ -118,13 +129,29 @@ model User {
 ///////////////////////
 
 model MemberCard {
-  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
 
-  userId      String     @db.ObjectId @unique
-  user        User       @relation(fields: [userId], references: [id])
+  userId       String      @db.ObjectId @unique
+  user         User        @relation(fields: [userId], references: [id])
 
-  status      CardStatus @default(EN_ATTENTE)
-  demandeDate DateTime   @default(now())
+  // Snapshot identité
+  nom          String?
+  prenoms      String?
+  photo        String?
+  code         String?     @unique
+  date         String?
+
+  // Infos selon profil
+  poste        String?
+  memberType   MemberType?
+  organisation String?
+  classe       String?
+  detail       String?
+  matricule    String?
+
+  status       CardStatus  @default(EN_ATTENTE)
+  demandeDate  DateTime    @default(now())
+  validatedAt  DateTime?
 }
 
 ///////////////////////
@@ -142,13 +169,14 @@ model Payment {
 
   amount      Int
   type        PaymentType
-  method      PaymentMethod
+  method      PaymentMethod?
 
   description String?
 
-  status      PaymentStatus @default(SUCCESS)
+  status      PaymentStatus @default(PENDING)
 
   createdAt   DateTime      @default(now())
+  updatedAt   DateTime?     @updatedAt
 }
 
 ///////////////////////
@@ -167,9 +195,10 @@ model Expense {
   method      PaymentMethod
 
   createdAt   DateTime @default(now())
+  updatedAt   DateTime? @updatedAt
 }
 
-///////////////////////
+/////////////////////// 
 // EVENEMENT AEEY
 ///////////////////////
 
