@@ -1,13 +1,13 @@
 
 
-const { logData } = require("../../client/src/utils/console");
+// const { logData } = require("../../client/src/utils/console");
 const paymentModel = require("../models/payment.model")
 
 const addPayment = async (req,res) => {
     const addData = req.body.addData;
     const userId = req.params.id
-    logData("addData",addData)
-    logData("userId",userId)
+    // logData("addData",addData)
+    // logData("userId",userId)
 
     try {
             // Extraire les infos structurées du frontend

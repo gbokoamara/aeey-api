@@ -1,9 +1,9 @@
-const { logData } = require("../../client/src/utils/console");
+// const { logData } = require("../../client/src/utils/console");
 const expenseModel = require("../models/expense.model")
 
 
 const addExpense = async (req, res) => {
-    logData("expense front client", req.body);
+    // logData("expense front client", req.body);
     const addData = req.body.addData;
     
     try {
@@ -14,7 +14,7 @@ const addExpense = async (req, res) => {
             amount: addData.amount ? parseInt(addData.amount, 10) : 0,
             method: addData.method ? addData.method.toUpperCase() :addData.method ,
         }
-        logData("addPayload", addPayload)
+        // logData("addPayload", addPayload)
         const expense = await expenseModel.addExpense(addPayload)
         res.status(200).json({message:"Opération effectuée avec succès !", expense})
     } catch (error) {
@@ -33,8 +33,8 @@ const updateExpense = async (req, res) => {
             amount: updateData.amount ? parseInt(updateData.amount, 10) : 0,
             method: updateData.method ? updateData.method.toUpperCase() : updateData.method ,
         }
-        logData("updateData",updateData)
-        logData("updatePayload",updatePayload)
+        // logData("updateData",updateData)
+        // logData("updatePayload",updatePayload)
         const expense = await expenseModel.updateExpense(expenseId, updatePayload)
         res.status(200).json({message:"Opération effectuée avec succès !", expense})
     } catch (error) {
@@ -44,7 +44,7 @@ const updateExpense = async (req, res) => {
 }
 const getExpense = async (req, res) => {
     const expenseId = req.params.id
-    logData("expenseId",expenseId)
+    // logData("expenseId",expenseId)
     try {
         const expense = await expenseModel.getExpense(expenseId)
         res.status(200).json({message:"Opération effectuée avec succès !", expense})

@@ -1,4 +1,4 @@
-const { logData } = require("../../client/src/utils/console");
+// const { logData } = require("../../client/src/utils/console");
 const prisma = require("../utils/prisma")
 
 
@@ -11,7 +11,7 @@ module.exports = {
     },
 
      getCardByUserId: async (userId) => {
-            logData("userId ...", userId)
+            // logData("userId ...", userId)
         
         const card = await prisma.memberCard.findUnique({
            where: {userId: userId},

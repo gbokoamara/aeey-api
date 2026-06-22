@@ -1,8 +1,8 @@
-const { logData } = require("../../client/src/utils/console");
+// const { logData } = require("../../client/src/utils/console");
 const eventModel = require("../models/event.model");
 
 const addEvent = async (req, res) => {
-  logData("event front client", req.body);
+  // logData("event front client", req.body);
   const addData = req.body.addData;
   try {
     const addPayload = {
@@ -21,10 +21,10 @@ const addEvent = async (req, res) => {
 };
 
 const updateEvent = async (req, res) => {
-  logData("event front client", req.body);
+  // logData("event front client", req.body);
   const updateData = req.body.updateData;
   const eventId = req.params.id;
-  logData("eventId front client", eventId);
+  // logData("eventId front client", eventId);
 
   try {
     const updatePayload = {
@@ -45,10 +45,10 @@ const updateEvent = async (req, res) => {
 };
 
 const publishEvent = async (req, res) => {
-  logData("event front client", req.body);
+  // logData("event front client", req.body);
   const {isPublished} = req.body
   const eventId = req.params.id;
-  logData("eventId front client", eventId);
+  // logData("eventId front client", eventId);
 
   // Sécurité : vérifier si l'ID est présent
   if (!eventId) {
@@ -72,7 +72,7 @@ const publishEvent = async (req, res) => {
 
 const deleteEvent = async (req, res) => {
   const eventId = req.params.id;
-  logData("eventId front client", eventId);
+  // logData("eventId front client", eventId);
 
   try {
     await eventModel.deleteEvent(eventId);
@@ -112,7 +112,7 @@ const getAllEvents = async (req, res) => {
 
 const getEvent = async (req, res) => {
   const eventId = req.params.id;
-  logData("eventId", eventId);
+  // logData("eventId", eventId);
   try {
     const event = await eventModel.getEvent(eventId);
     res.status(200).json({ message: "Evenement reçus avec succès !", event });

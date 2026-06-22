@@ -1,9 +1,9 @@
-const { logData } = require("../../client/src/utils/console");
+// const { logData } = require("../../client/src/utils/console");
 const prisma = require("../utils/prisma");
 
 module.exports = {
     getUser: async (id) => {
-      logData("id in getuser model", id)
+      // logData("id in getuser model", id)
     try {
       const user = await prisma.user.findFirst({
       where:{id},
@@ -16,7 +16,7 @@ module.exports = {
   },
 
     update: async (id, data) => {
-      logData("data in update model", data)
+      // logData("data in update model", data)
     try {
       const updatedUser = await prisma.user.update({
       where:{id},

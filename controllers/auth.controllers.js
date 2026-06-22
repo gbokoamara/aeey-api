@@ -1,11 +1,11 @@
-const { logData } = require("../../client/src/utils/console")
+// const { logData } = require("../../client/src/utils/console")
 const authModel = require("../models/auth.model")
 const {hashePassword, comparePassword} = require("../utils/password")
 const {generateToken} = require("../utils/token")
 
 const login = async (req, res) => {
     const {firstName, number} = req.body
-    logData("datafromfrotend", req.body)
+    // logData("datafromfrotend", req.body)
     const registerData = {firstName, number}
     try {
         // attendre la réponse 
@@ -27,8 +27,8 @@ const   register = (req, res) => {
 const   password = async (req, res) => {
     const {password} = req.body;
     const {id} = req.params;
-    logData("password", password)
-    logData("id", id)
+    // logData("password", password)
+    // logData("id", id)
     try {
 
         const user = await authModel.getUser(id);
@@ -56,11 +56,11 @@ const   password = async (req, res) => {
 };
 
 const   passwordLogin = async (req, res) => {
-    logData("req.body", req.body)
+    // logData("req.body", req.body)
     const {password} = req.body;
     const {id} = req.params;
-    logData("password", password)
-    logData("id", id)
+    // logData("password", password)
+    // logData("id", id)
     try {
 
         const user = await authModel.getUser(id);

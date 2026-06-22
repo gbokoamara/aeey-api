@@ -1,9 +1,9 @@
-const { logData } = require("../../client/src/utils/console");
+// const { logData } = require("../../client/src/utils/console");
 const userModel = require("../models/user.model");
 
 const update = async (req, res) => {
-  // logData("update profil :=>", req.body)
-  logData("updateDate de req.body.updateDate", req.body.updateDate)
+  logData("update profil :=>", req.body)
+  // logData("updateDate de req.body.updateDate", req.body.updateDate)
   const {
     firstName,
     lastName,
@@ -28,7 +28,7 @@ const update = async (req, res) => {
   } = req.body.updateDate;
 
   const { id } = req.params;
-    logData("id", req.params)
+    // logData("id", req.params)
 
   try {
     const updatedUser = await userModel.update(id, {
@@ -53,7 +53,7 @@ const update = async (req, res) => {
       memberType:  memberType,
       profession: profession,
     });
-    logData("updatedUser", updatedUser)
+    // logData("updatedUser", updatedUser)
 
     res.status(200).json({message:"Profil modifié avec succèss !", user: updatedUser})
   } catch (error) {
@@ -66,9 +66,9 @@ const register = (req, res) => {
 };
 
 const memberRequest = async (req, res) => {
-  logData("req.body.cardData", req.body.cardData)
+  // logData("req.body.cardData", req.body.cardData)
   let cardData = req.body.cardData
-  logData("cardData", cardData)
+  // logData("cardData", cardData)
 
   const {id} = req.params
   try {
