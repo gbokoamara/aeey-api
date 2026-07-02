@@ -18,7 +18,7 @@ const addPayment = async (req,res) => {
       member: "COTISATION",
       other:  "COTISATION_TIERCE",
       guest:  "DON",
-      carte:  "CARTE_MEMBRE",
+      carte:  "CARTE",
     };
 
     const paymentPayload = {
@@ -56,8 +56,19 @@ const getAllPayments= async (req,res) => {
     }
 };
 
+const getPaymentStat= async (req,res) => {
+
+    try {
+        const stats = await paymentModel.getPaymentStat()
+        res.status(200).json({message:"Opération reussi avec succès!", stats})
+    } catch (error) {
+        res.status(500).json({message:"Erreur seuveur"})
+    }
+};
+
 module.exports = {
     addPayment,
     getPayment,
-    getAllPayments
+    getAllPayments,
+    getPaymentStat
 }

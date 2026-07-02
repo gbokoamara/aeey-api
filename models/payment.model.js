@@ -31,4 +31,24 @@ module.exports = {
             throw error
         }
     },
+    getPaymentStat: async () => {
+    try {
+        const stats = await prisma.payment.aggregate({
+            _sum: {
+                amount: true
+            },
+            _count: {
+                id: true
+            }
+        })
+
+        return {
+            totalAmount: stats._sum.amount || 0,
+            totalPayments: stats._count.id
+        }
+    } catch (error) {
+        console.error(error)
+        throw error
+    }
+},
 }
