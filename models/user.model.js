@@ -15,7 +15,7 @@ module.exports = {
     }
   },
 
-    update: async (id, data) => {
+  update: async (id, data) => {
       // logData("data in update model", data)
     try {
       const updatedUser = await prisma.user.update({
@@ -28,5 +28,17 @@ module.exports = {
       throw error;
     }
   },
+
+  getUserByNumber: async (number) => {
+    
+    try {
+      const user = await prisma.user.findFirst({where: {number: number}})
+      return user;
+    } catch (error) {
+      console.error("erreur de recuperation de l'utilisateur par numero",error.message)
+      throw error
+    }
+
+  }
     
 }

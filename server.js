@@ -35,6 +35,12 @@ app.use("/member", memberRoutes)
 const paymentRoutes = require("./routes/payment.routes")
 app.use("/payment", paymentRoutes)
 
+const cotisationRoutes = require("./routes/cotisation.routes")
+app.use("/cotisation", cotisationRoutes)
+
+const webhookRoutes = require("./routes/webhook.routes")
+app.use("/webhook", webhookRoutes)
+
 const port = process.env.PORT || 9000
 app.listen(port, () => {
     console.log(`le server tourne sur le port: http://localhost:${port}`)

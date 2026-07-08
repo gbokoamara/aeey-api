@@ -2,7 +2,7 @@
 const userModel = require("../models/user.model");
 
 const update = async (req, res) => {
-  logData("update profil :=>", req.body)
+  // logData("update profil :=>", req.body)
   // logData("updateDate de req.body.updateDate", req.body.updateDate)
   const {
     firstName,

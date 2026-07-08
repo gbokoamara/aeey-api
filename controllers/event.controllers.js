@@ -11,12 +11,13 @@ const addEvent = async (req, res) => {
       location: addData.location,
       date: addData.date ? new Date(addData.date) : null,
       image: addData.image,
+      amount: parseInt(addData.amount),
     };
     const event = await eventModel.addEvent(addPayload);
     res.status(200).json({ message: "Evenement ajouté avec succès !", event });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur lors de l'ajout de l'evenement" });
+    res.status(500).json({ message: "Erreur lors de l'ajout de l'evenement", error: error.message });
   }
 };
 
@@ -33,6 +34,7 @@ const updateEvent = async (req, res) => {
       location: updateData.location,
       date: updateData.date ? new Date(updateData.date) : null,
       image: updateData.image,
+      amount: parseInt(updateData.amount),
     };
     const event = await eventModel.updateEvent(eventId, updatePayload);
     res.status(200).json({ message: "Evenement modifié avec succès !", event });
@@ -40,7 +42,7 @@ const updateEvent = async (req, res) => {
     console.error(error);
     res
       .status(500)
-      .json({ message: "Erreur lors de la modification de l'evenement" });
+      .json({ message: "Erreur lors de la modification de l'evenement", error: error.message });
   }
 };
 
@@ -106,7 +108,7 @@ const getAllEvents = async (req, res) => {
     console.error(error);
     res
       .status(500)
-      .json({ message: "Erreur lors de recuperation des evenements" });
+      .json({ message: "Erreur lors de recuperation des evenements", error: error.message });
   }
 };
 

@@ -45,8 +45,18 @@ const getCard = async (req, res) => {
   }
 }
 
+const getrequestedCards = async (req, res) => {
+  try {
+    const cards = await cardModel.getRequestedCars()
+    res.status(200).json({message:"succès de recupération des cartes en attente de validation", cards})
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({message:"erreur de recupération des cartes en attente de validation"})
+  }
+}
 
 module.exports = {
   requestCard,
-  getCard
+  getCard,
+  getrequestedCards,
 }

@@ -15,12 +15,12 @@ module.exports = {
         }
     },
 
-    updateEvent: async (eventId, updatePayload) => {
+    updateEvent: async (eventId, eventUpdatePayload) => {
         try {
             const event = await prisma.event.update(
                 {
                     where: {id: eventId},
-                    data: updatePayload
+                    data: eventUpdatePayload
                 }
             )
             return event

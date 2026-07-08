@@ -53,6 +53,7 @@ enum PaymentType {
   DON
   CARTE
   SERVICE
+  EVENT
 }
 
 enum CardStatus {
@@ -119,9 +120,32 @@ model User {
   // relations
   payments      Payment[]
   memberCard    MemberCard?
+  // Cotisations dont je bénéficie
+  memberCotisations CotisationRecord[] @relation("MemberCotisations")
+  // Cotisations que j'ai payées
+  paidCotisations CotisationRecord[] @relation("PaidCotisations")
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+///////////////////////
+// EXPENSE AEEY
+///////////////////////
+
+model Expense {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  name        String   // frontend "name"
+  phoneNumber String   // frontend "number"
+
+  description String
+  amount      Int
+
+  method      PaymentMethod
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime? @updatedAt
 }
 
 ///////////////////////
@@ -149,9 +173,27 @@ model MemberCard {
   detail       String?
   matricule    String?
 
+  // Infos de paiement associé
+  payments      Payment[]
+
   status       CardStatus  @default(EN_ATTENTE)
   demandeDate  DateTime    @default(now())
   validatedAt  DateTime?
+
+  // Date d'expiration de la carte
+  expiresAt    DateTime?
+}
+
+model CardSetting {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+
+    title String
+    amount Int
+
+    isActive Boolean @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 ///////////////////////
@@ -160,42 +202,99 @@ model MemberCard {
 
 model Payment {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
-
   userId      String?       @db.ObjectId
   user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
-
   name        String?       // correspond à frontend "name"
   phoneNumber String        // correspond à "number"
-
   amount      Int
   type        PaymentType
-  method      PaymentMethod?
-
+  method      String?
   description String?
-
   status      PaymentStatus @default(PENDING)
 
+  // Relation avec la carte
+  memberCardId String?       @db.ObjectId
+  memberCard   MemberCard?   @relation(fields: [memberCardId], references: [id])
+
+  // Relation avec la cotisation  
+  cotisationId String?       @db.ObjectId
+  cotisation   Cotisation?   @relation(fields:[cotisationId], references:[id])
+  cotisationRecord   CotisationRecord?
+
+  // Relation avec l'evenement
+  eventId String?            @db.ObjectId
+  event   Event?             @relation(fields:[eventId], references:[id])
+
+  // Relation avec le donation
+  donationId String?         @db.ObjectId
+  donation Donation?         @relation(fields:[donationId], references:[id])
   createdAt   DateTime      @default(now())
   updatedAt   DateTime?     @updatedAt
 }
 
+/////////////////////// 
+// CAUTISATION AEEY
 ///////////////////////
-// EXPENSE AEEY
-///////////////////////
 
-model Expense {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+model Cotisation {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name        String   // frontend "name"
-  phoneNumber String   // frontend "number"
-
-  description String
+  title       String
   amount      Int
+  description String?
+  period      String
 
-  method      PaymentMethod
+  active      Boolean @default(true)
+
+  payments    Payment[]
+  records     CotisationRecord[]
 
   createdAt   DateTime @default(now())
-  updatedAt   DateTime? @updatedAt
+  updatedAt   DateTime @updatedAt
+}
+
+model CotisationRecord {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Paiement associé
+  paymentId String   @unique @db.ObjectId
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+
+  // Cotisation concernée (Mensuelle, Annuelle, etc.)
+  cotisationId String      @db.ObjectId
+  cotisation   Cotisation  @relation(fields: [cotisationId], references: [id])
+
+  // Membre bénéficiaire
+  memberId String @db.ObjectId
+  member   User   @relation("MemberCotisations", fields: [memberId], references: [id])
+
+  // Celui qui a payé (peut être null si invité)
+  payerId String? @db.ObjectId
+  payer   User?   @relation("PaidCotisations", fields: [payerId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+/////////////////////// 
+// DONATION AEEY
+///////////////////////
+
+model Donation {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title         String
+  description   String?
+
+  targetAmount  Int?
+  minimumAmount Int?
+
+  status        Boolean @default(false)
+  isActive      Boolean @default(true)
+
+  payments      Payment[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 /////////////////////// 
@@ -214,6 +313,14 @@ model Event {
   image       String?
 
   status      EventStatus @default(DRAFT) // par défaut "en cours"
+
+  amount      Int?
+
+  // Somme réellement encaissée
+  collectedAmount Int @default(0)
+  // Nombre de paiements réussis
+  participantCount Int @default(0)
+  payments    Payment[]
 
   // utile pour reprogrammation
   previousDate DateTime?
