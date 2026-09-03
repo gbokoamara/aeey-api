@@ -79,9 +79,25 @@ const checkPayment = async (req, res) => {
 
     res.status(200).json({message:"Opération reussi avec succès!", status: true, paymentData})
  } catch (error) {
-    res.status(500).json({message:"Erreur seuveur", error: error.message})
+   res.status(500).json({message:"Erreur seuveur", error: error.message})
 
  }
 }
 
-module.exports = {webhook, checkPayment}
+const checkPayout = async (req, res) => {
+   console.log("req", req)
+   // const { event, tokenPay, montant, numeroRetrait, moyen, createdAt } = req?.body;
+ try {
+   //  console.log("event", event)
+   //   console.log("tokenPay", tokenPay)
+   //    console.log("montant", montant)
+   //     console.log("numeroRetrait", numeroRetrait)
+   //      console.log("moyen", moyen)
+   //       console.log("createdAt", createdAt)
+ } catch (error) {
+   console.error(error);
+    res.status(500).json({message:"Erreur seuveur", error: error.message})
+ }
+};
+
+module.exports = {webhook, checkPayment, checkPayout}

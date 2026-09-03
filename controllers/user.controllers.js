@@ -1,59 +1,48 @@
 // const { logData } = require("../../client/src/utils/console");
 const userModel = require("../models/user.model");
 
+const profil = async(req, res) => {
+  const userId = req.params.id
+  try {
+    const user = await userModel.getProfil(userId);
+  res.status(200).json({message:"Utilisateur recuperé avec succès!", user}) 
+  } catch (error) {
+    res.status(500).json({message: "Erreur de recuperation server", error:error.message})
+  }
+}
 const update = async (req, res) => {
   // logData("update profil :=>", req.body)
   // logData("updateDate de req.body.updateDate", req.body.updateDate)
-  const {
-    firstName,
-    lastName,
-    number,
-    email,
-    photo,
-    city,
-    address,
-    sex,
-    role,
-    occupation,
-    entreprise,
-    etablissement,
-    niveau,
-    filiere,
-    matricule,
-    document,
-    section,
-    poste,
-    memberType, 
-    profession,
-  } = req.body.updateDate;
 
+  const updateDate = req.body.updateDate;
   const { id } = req.params;
     // logData("id", req.params)
 
   try {
     const updatedUser = await userModel.update(id, {
-      firstName: firstName,
-      lastName: lastName,
-      number: number,
-      email: email,
-      photo: photo,
-      city: city,
-      address: address,
-      sex: sex,
-      role: role,
-      occupation: occupation,
-      entreprise: entreprise,
-      etablissement: etablissement,
-      niveau: niveau,
-      filiere: filiere,
-      matricule: matricule,
-      document: JSON.stringify(document),
-      section: section,
-      poste: poste,
-      memberType:  memberType,
-      profession: profession,
+      firstName: updateDate.firstName,
+      lastName: updateDate.lastName,
+      number: updateDate.number,
+      email: updateDate.email,
+      photo: updateDate.photo,
+      city: updateDate.city,
+      address: updateDate.address,
+      sex: updateDate.sex,
+      role: updateDate.role,
+      occupation: updateDate.occupation,
+      entreprise: updateDate.entreprise,
+      etablissement: updateDate.etablissement,
+      niveau: updateDate.niveau,
+      filiere: updateDate.filiere,
+      matricule: updateDate.matricule,
+      document: updateDate.document,
+      section: updateDate.section,
+      poste: updateDate.poste,
+      memberType: updateDate. memberType,
+      profession: updateDate.profession,
     });
-    // logData("updatedUser", updatedUser)
+
+    // console.log("updatedUser", updatedUser)
 
     res.status(200).json({message:"Profil modifié avec succèss !", user: updatedUser})
   } catch (error) {
@@ -97,11 +86,11 @@ const memberRequest = async (req, res) => {
             // document: cardData.document, // Attention: Prisma attend un String pour document, vérifie le format
         };
     const member = await userModel.update(id, updatePayload)
-    res.status(200).json({message:"demande effectuée avec succès !", member})
+    res.status(200).json({message:"demande effectuée avec succès !", status : true, member})
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erreur lors de la demande d'adhésion" });
   }
 };
 
-module.exports = { update, register, memberRequest };
+module.exports = { profil,update, register, memberRequest };

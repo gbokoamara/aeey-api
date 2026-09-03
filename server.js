@@ -41,6 +41,11 @@ app.use("/cotisation", cotisationRoutes)
 const webhookRoutes = require("./routes/webhook.routes")
 app.use("/webhook", webhookRoutes)
 
+const cloudinaryRoutes = require("./routes/cloudinary.routes");
+app.use("/cloudinary/upload", cloudinaryRoutes)
+
+// const whatsappService = require("./services/expenses/whatsapp");
+
 const port = process.env.PORT || 9000
 app.listen(port, () => {
     console.log(`le server tourne sur le port: http://localhost:${port}`)

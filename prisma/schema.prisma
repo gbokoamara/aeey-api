@@ -54,6 +54,7 @@ enum PaymentType {
   CARTE
   SERVICE
   EVENT
+  WITHDRAW
 }
 
 enum CardStatus {
@@ -83,6 +84,11 @@ model User {
   number      String   @unique
   email       String?
   photo       String?
+
+  // Pays
+  countryName String?
+  countryCode String?
+  countryIso String?
 
   city        String?
   address     String?
@@ -125,6 +131,10 @@ model User {
   // Cotisations que j'ai payées
   paidCotisations CotisationRecord[] @relation("PaidCotisations")
 
+  // depenses
+  createdExpenses Expense[] @relation("ExpenseCreator")
+  approvals ExpenseApproval[] @relation("ExpenseModerator")
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -132,20 +142,67 @@ model User {
 ///////////////////////
 // EXPENSE AEEY
 ///////////////////////
+enum ExpenseStatus{
+    PENDING
+    APPROVED
+    PROCESSING
+    PAID
+    REJECTED
+}
 
 model Expense {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
 
   name        String   // frontend "name"
   phoneNumber String   // frontend "number"
-
   description String
   amount      Int
+  method      String
 
-  method      PaymentMethod
+  // Pays
+  countryName String?
+  countryCode String?
+  countryIso String?
+
+  status      ExpenseStatus @default(PENDING)
+  tokenPay    String?
+
+  approvals   ExpenseApproval[]
+
+  payment     Payment?
+  createdById String? @db.ObjectId
+  createdBy   User? @relation("ExpenseCreator", fields: [createdById], references: [id])
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime? @updatedAt
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model ExpenseApproval {
+
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  expenseId String @db.ObjectId
+  expense Expense @relation(fields:[expenseId], references:[id])
+
+  moderatorId String @db.ObjectId
+  moderator User @relation("ExpenseModerator", fields:[moderatorId], references:[id])
+
+  status ApprovalStatus @default(PENDING)
+
+  comment String?
+
+  approvedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([expenseId, moderatorId])
 }
 
 ///////////////////////
@@ -211,6 +268,11 @@ model Payment {
   method      String?
   description String?
   status      PaymentStatus @default(PENDING)
+  // Pays
+  countryName String?
+  countryCode String?
+  countryIso String?
+
 
   // Relation avec la carte
   memberCardId String?       @db.ObjectId
@@ -228,6 +290,13 @@ model Payment {
   // Relation avec le donation
   donationId String?         @db.ObjectId
   donation Donation?         @relation(fields:[donationId], references:[id])
+
+  // depenses
+  tokenPay String? @unique
+  providerStatus String?
+  expenseId String? @unique @db.ObjectId
+  expense Expense? @relation(fields:[expenseId], references:[id])
+
   createdAt   DateTime      @default(now())
   updatedAt   DateTime?     @updatedAt
 }
@@ -330,4 +399,23 @@ model Event {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime? @updatedAt
+}
+
+/////////////////////// 
+// TRESORERIE AEEY
+///////////////////////
+model Treasury {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  initialBalance    Int @default(0)      // Montant initial avant payment non retirable
+  balance           Int @default(0)      // total de la caisse
+  totalPayIn        Int @default(0)      // total des payment
+  totalPayOut       Int @default(0)      // total des retrait
+  totalUser         Int @default(0)      // total des utilisateur
+  totalMember       Int @default(0)      // total des membre
+  totalCard         Int @default(0)      // total des carte membre
+  fee               Int @default(0)      // total des frais payment
+  cardAmount        Int @default(0)      // prix d'obtention de la carte membre
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

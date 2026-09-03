@@ -1,2 +1,6 @@
-historique de payement
-historique des depenses
+liste des cartes
+upload photo
+cloudinary
+securité pour saisir les vrai numeros
+moderateurs
+payOut apres enregistrement de depenses

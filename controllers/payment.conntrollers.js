@@ -12,8 +12,8 @@ const { payment } = require("../utils/prisma");
 const addPayment = async (req,res) => {
     const addData = req.body.addData;
     const userId = req.params.id
-    // logData("addData",addData)
-    // logData("userId",userId)
+    // console.log("addData",addData)
+    // console.log("userId",userId)
 
     try {
         // Extraire les infos structurées du frontend

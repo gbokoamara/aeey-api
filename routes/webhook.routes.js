@@ -2,11 +2,12 @@
 
 
 const express = require("express")
-const { webhook, checkPayment } = require("../controllers/webhook.controllers")
+const { webhook, checkPayment, checkPayout } = require("../controllers/webhook.controllers")
 const router = express.Router()
 
 router.post("/", webhook)
 router.post("/check", checkPayment)
+router.post("/payout", checkPayout)
 
 
 

@@ -1,20 +1,30 @@
 // const { logData } = require("../../client/src/utils/console")
 const authModel = require("../models/auth.model")
+const { sendOtp } = require("../services/expenses/notification")
 const {hashePassword, comparePassword} = require("../utils/password")
 const {generateToken} = require("../utils/token")
 
 const login = async (req, res) => {
-    const {firstName, number} = req.body
-    // logData("datafromfrotend", req.body)
-    const registerData = {firstName, number}
+    const data = req.body.data
+    // console.log("number", data.number)
+    const number = data.number
+    const registerData = {
+        number: data.number,
+        countryName: data.countryName,
+        countryCode: data.countryCode,
+        countryIso: data.countryIso,
+    }
     try {
         // attendre la réponse 
         let user = await authModel.login(number)
-        if (!user) {
-            // si user n'existe pas → on crée
-            user =  await authModel.register(registerData)
-        }
-        res.status(201).json({message:"success login", user})
+        const token = generateToken(user);
+        // if (!user) {
+        //     //  on envoie l'otp
+        //     // const code = await sendOtp(number)
+        //     // si user n'existe pas → on crée
+        //     // user =  await authModel.register(registerData)
+        // }
+        res.status(201).json({message:"success login", user, token})
     } catch (error) {
         res.status(500).json({message: "error login", error: error.message})
     }

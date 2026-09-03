@@ -23,7 +23,7 @@ const getPendingMember = async (req, res) => {
 
     try {
         const pendingMembers = await memberModel.getPendingMember()
-        res.status(200).json({message:"Opération effectuée avec succès !", pendingMembers})
+        res.status(200).json({message:"Opération effectuée avec succès !",  pendingMembers})
     } catch (error) {
         console.error(error);
         res.status(500).json({message: "Erreur serveur"})
