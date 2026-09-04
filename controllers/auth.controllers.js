@@ -6,7 +6,7 @@ const {generateToken} = require("../utils/token")
 
 const login = async (req, res) => {
     const data = req.body.data
-    // console.log("number", data.number)
+    console.log("data", data)
     const number = data.number
     const registerData = {
         number: data.number,
@@ -17,7 +17,7 @@ const login = async (req, res) => {
     try {
         // attendre la réponse 
         let user = await authModel.login(number)
-        const token = generateToken(user);
+        const token = await generateToken(user);
         // if (!user) {
         //     //  on envoie l'otp
         //     // const code = await sendOtp(number)

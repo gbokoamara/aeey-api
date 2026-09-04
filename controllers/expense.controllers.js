@@ -10,7 +10,7 @@ const addExpense = async (req, res) => {
     // console.log("expense front client", req.params);
     const addData = req.body.addData;
     const userId = req.params.userId
-    // console.log("addData", addData)
+    console.log("addData", addData)
     try {
         const addPayload = {
             name: addData.name ,
@@ -34,7 +34,7 @@ const addExpense = async (req, res) => {
         // console.log("moderators", moderators)
         // console.log("initiator", initiator)
         const emails = moderators.map(moderator => moderator.email);
-        // console.log("emails", emails)
+        console.log("emails", emails)
         if(initiator.role === "ADMIN") {
             await notification.withdrawApproveNotif(moderators, initiator, aprove_url)
         }
@@ -49,7 +49,7 @@ const updateExpense = async (req, res) => {
     const expenseId = req.params.id;
     const user = req.user;
     const userId = user?.id
-    // console.log("userId", userId)
+    console.log("updateData", updateData)
     try {
         const updatePayload = {
             name : updateData.name,
@@ -70,7 +70,7 @@ const updateExpense = async (req, res) => {
         const aprove_url = `${url}/${expense.id}`;
 
         const emails = moderators.map(moderator => moderator.email);
-        // console.log("emails", emails)
+        console.log("emails", emails)
         // console.log("user", user)
         if(initiator.role === "ADMIN") {
             await notification.withdrawApproveNotif(moderators, initiator, aprove_url)
