@@ -1,5 +1,7 @@
 
 const nodemailer = require("nodemailer");
+const { BrevoClient } = require("@getbrevo/brevo");
+
 
 const transporter = nodemailer.createTransport({
 // service: "gmail",
@@ -16,7 +18,7 @@ pass: process.env.MAIL_PASSWORD,
 },
 });
 
-const sendNotifByMail = async ({ email, subject, message }) => {
+const sendNotifByNodemailer = async ({ email, subject, message }) => {
     if (!email) {
         throw new Error("Adresse email manquante");
     }
@@ -40,6 +42,34 @@ const sendNotifByMail = async ({ email, subject, message }) => {
     return result;
 };
 
+const brevo = new BrevoClient({
+    apiKey: process.env.BREVO_API_KEY,
+});
+
+const sendNotifByMail = async ({ email, subject, message }) => {
+    if (!email) {
+        throw new Error("Adresse email manquante");
+    }
+
+    const recipients = Array.isArray(email) ? email : [email];
+    console.log("email", email)
+    console.log("message", message)
+    console.log("subject", subject)
+    const result = await brevo.transactionalEmails.sendTransacEmail({
+        subject,
+        textContent: message,
+        sender: {
+            name: "AEEY",
+            email: process.env.BREVO_SENDER_EMAIL, // votre email de compte Brevo au départ
+        },
+        to: recipients.map((e) => ({ email: e })),
+    });
+    console.log("📨 BREVO RESULT :", result);
+    return result;
+};
+
+
 module.exports = {
-sendNotifByMail,
+sendNotifByNodemailer,
+sendNotifByMail
 };

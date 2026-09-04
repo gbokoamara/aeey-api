@@ -10,7 +10,7 @@ const addExpense = async (req, res) => {
     // console.log("expense front client", req.params);
     const addData = req.body.addData;
     const userId = req.params.userId
-    console.log("addData", addData)
+    // console.log("addData", addData)
     console.log("userId", userId)
 
     try {
@@ -35,10 +35,11 @@ const addExpense = async (req, res) => {
         // console.log("aprove_url", aprove_url)
         // console.log("moderators", moderators)
         // console.log("initiator", initiator)
-        const emails = moderators.map(moderator => moderator.email);
-        console.log("emails", emails)
+        // const emails = moderators.map(moderator => moderator.email);
+        // console.log("emails", emails)
         if(initiator.role === "ADMIN") {
-            await notification.withdrawApproveNotif(moderators, initiator, aprove_url)
+           const results =  await notification.withdrawApproveNotif(moderators, initiator, aprove_url)
+           console.log("📨 NOTIFICATIONS RESULTS :", results);
         }
         res.status(200).json({message:"Opération effectuée avec succès !", expense})
     } catch (error) {
@@ -51,7 +52,7 @@ const updateExpense = async (req, res) => {
     const expenseId = req.params.id;
     const user = req.user;
     const userId = user?.id
-    console.log("updateData", updateData)
+    // console.log("updateData", updateData)
     console.log("userId", userId)
     try {
         const updatePayload = {
@@ -72,15 +73,16 @@ const updateExpense = async (req, res) => {
         const url = process.env.APPROVE_EXPENSE;
         const aprove_url = `${url}/${expense.id}`;
 
-        const emails = moderators.map(moderator => moderator.email);
-        console.log("emails", emails)
-        console.log("user", user)
+        // const emails = moderators.map(moderator => moderator.email);
+        // console.log("emails", emails)
+        // console.log("user", user)
         if(initiator.role === "ADMIN") {
-            await notification.withdrawApproveNotif(moderators, initiator, aprove_url)
+            const results = await notification.withdrawApproveNotif(moderators, initiator, aprove_url)
+            console.log("📨 NOTIFICATIONS RESULTS :", results);
         }
 
         // console.log("updateData",updateData)
-        console.log("updatePayload",updatePayload)
+        // console.log("updatePayload",updatePayload)
         
         res.status(200).json({message:"Opération effectuée avec succès !", expense})
     } catch (error) {
