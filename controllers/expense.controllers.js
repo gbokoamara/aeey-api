@@ -275,7 +275,7 @@ const rejectExpense = async (req, res) => {
             newExpenseStatus = "REJECTED"
         }
 
-        // console.log("expense", expense)
+        console.log("newExpenseStatus", newExpenseStatus)
         if (newExpenseStatus === "APPROVED") {
             
             const payoutdata = {
