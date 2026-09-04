@@ -11,6 +11,8 @@ const addExpense = async (req, res) => {
     const addData = req.body.addData;
     const userId = req.params.userId
     console.log("addData", addData)
+    console.log("userId", userId)
+
     try {
         const addPayload = {
             name: addData.name ,
@@ -41,7 +43,7 @@ const addExpense = async (req, res) => {
         res.status(200).json({message:"Opération effectuée avec succès !", expense})
     } catch (error) {
         console.error(error);
-        res.status(500).json({message: "erreur serveur"})
+        res.status(500).json({message: "erreur serveur", error: error.message })
     }
 }
 const updateExpense = async (req, res) => {
@@ -50,6 +52,7 @@ const updateExpense = async (req, res) => {
     const user = req.user;
     const userId = user?.id
     console.log("updateData", updateData)
+    console.log("userId", userId)
     try {
         const updatePayload = {
             name : updateData.name,
@@ -71,18 +74,18 @@ const updateExpense = async (req, res) => {
 
         const emails = moderators.map(moderator => moderator.email);
         console.log("emails", emails)
-        // console.log("user", user)
+        console.log("user", user)
         if(initiator.role === "ADMIN") {
             await notification.withdrawApproveNotif(moderators, initiator, aprove_url)
         }
 
         // console.log("updateData",updateData)
-        // console.log("updatePayload",updatePayload)
+        console.log("updatePayload",updatePayload)
         
         res.status(200).json({message:"Opération effectuée avec succès !", expense})
     } catch (error) {
         console.error(error);
-        res.status(500).json({message: "erreur serveur"})
+        res.status(500).json({message: "erreur serveur", error: error.message})
     }
 }
 const getExpense = async (req, res) => {

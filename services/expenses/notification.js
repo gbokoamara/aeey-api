@@ -54,6 +54,9 @@ module.exports = {
   // },
 
   withdrawApproveNotif: async (moderators, initiator, url) => {
+    console.log("moderators", moderators)
+    console.log("initiator", initiator)
+    console.log("url", url)
     const notifications = moderators.map((moderator) => {
       return sendNotifByMail({
         email: moderator.email,

@@ -1,11 +1,11 @@
-
+// server.js
+const dns = require("dns")
 const express = require('express')
 const app = express()
-
 const cors = require("cors")
 const dotenv = require('dotenv')
 
-
+dns.setDefaultResultOrder("ipv4first");
 dotenv.config()
 app.use(cors())
 app.use(express.json())
@@ -47,6 +47,7 @@ app.use("/cloudinary/upload", cloudinaryRoutes)
 // const whatsappService = require("./services/expenses/whatsapp");
 
 const port = process.env.PORT || 9000
+const domain = process.env.DOMAIN || `http://localhost:${port}`
 app.listen(port, () => {
-    console.log(`le server tourne sur le port: http://localhost:${port}`)
+    console.log(`le server tourne sur le port: ${domain}`)
 })
