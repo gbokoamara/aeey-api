@@ -88,4 +88,26 @@ module.exports = {
         `,
     });
   },
+
+  resetPassword: async (email, name, url) => {
+    console.log("email", email)
+    console.log("url", url)
+      return sendNotifByMail({
+        email: email,
+        subject: "AEEY - Demande de modification de code Pin",
+        message: `
+        Bonjour ${name},
+
+        Vous avez initié une demande de modification de code Pin.
+
+        Merci de vous connecter à votre espace AEEY afin de l'approuver.
+
+        ${url}
+
+        Cordialement,
+        L'équipe AEEY
+         `.trim(),
+      });
+  },
+
 };

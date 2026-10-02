@@ -3,11 +3,16 @@ const cotisationModel = require("../models/cotisation.model");
 // create update getcotisationIdById getCotisations
 
 const addCotisation = async (req, res) => {
-  // console.log("id", req.params.id);
+  const user = req.user ;
   const id = req.params.id;
   const addData = req.body.addData;
-  // console.log("req.body", addData);
+  
   try {
+    // Verification de l'existance de l'utilisateur
+     const existingUser = await authModel.getUser(user?.id);
+     if (!existingUser) {
+         return res.status(404).json({message: "Aucun utilisateur trouvé"})
+    };
 
     const addPayload = {
       title: addData.title,
@@ -29,8 +34,14 @@ const addCotisation = async (req, res) => {
 const updateCotisation = async (req, res) => {
   const id = req.params.id;
   const updateData = req.body.updateData;
+  const user = req.user ;
   try {
-    // console.log("id", id);
+    // Verification de l'existance de l'utilisateur
+    const existingUser = await authModel.getUser(user?.id);
+      if (!existingUser) {
+        return res.status(404).json({message: "Aucun utilisateur trouvé"})
+    };
+
     // console.log("updateData reçu", updateData);
     const updatePayload = {
       title: updateData.title,
@@ -72,7 +83,13 @@ const getCotisations = async (req, res) => {
 
 const deleteCotisation = async (req, res) => {
   const cotisationId = req.params.id
+  const user = req.user ;
   try {
+    // Verification de l'existance de l'utilisateur
+    const existingUser = await authModel.getUser(user?.id);
+      if (!existingUser) {
+        return res.status(404).json({message: "Aucun utilisateur trouvé"})
+    };
     // console.log("cotisationId", cotisationId)
     const cotisations = await cotisationModel.deleteCotisation(cotisationId)
     res.status(200).json({message:"succès de suppression de la  cautisation", cotisations})

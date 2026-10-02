@@ -79,7 +79,7 @@ enum EventStatus {
 model User {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   
-  firstName   String
+  firstName   String?
   lastName    String?
   number      String   @unique
   email       String?
@@ -122,6 +122,8 @@ model User {
   password      String?
   isVerify      Boolean  @default(false)
   havePass      Boolean  @default(false)
+  passwordResets PasswordReset[]
+
 
   // relations
   payments      Payment[]
@@ -137,6 +139,18 @@ model User {
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model PasswordReset {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  token        String   @unique
+  passwordHash String
+  expiresAt    DateTime
+  used         Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 ///////////////////////
@@ -406,16 +420,19 @@ model Event {
 ///////////////////////
 model Treasury {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  initialBalance    Int @default(0)      // Montant initial avant payment non retirable
-  balance           Int @default(0)      // total de la caisse
-  totalPayIn        Int @default(0)      // total des payment
-  totalPayOut       Int @default(0)      // total des retrait
+  initialBalance    Float @default(0)      // Montant initial avant payment non retirable
+  balance           Float @default(0)      // total de la caisse
+  totalPayIn        Float @default(0)      // total des payment
+  totalPayOut       Float @default(0)      // total des retrait
   totalUser         Int @default(0)      // total des utilisateur
   totalMember       Int @default(0)      // total des membre
   totalCard         Int @default(0)      // total des carte membre
-  fee               Int @default(0)      // total des frais payment
-  cardAmount        Int @default(0)      // prix d'obtention de la carte membre
+  fee               Float @default(0)      // total des frais payment
+  cardAmount        Float @default(0)      // prix d'obtention de la carte membre
+  payInFee          Float @default(3)
+  payOutFee         Float @default(3)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+

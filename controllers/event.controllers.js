@@ -89,8 +89,8 @@ const deleteEvent = async (req, res) => {
 
 const getAllActiveEvents = async (req, res) => {
   try {
-    const events = await eventModel.getAllActiveEvents();
-    res.status(200).json({ message: "Evenements reçus avec succès !", events });
+    const {events, eventStats} = await eventModel.getAllActiveEvents();
+    res.status(200).json({ message: "Evenements reçus avec succès !", events, eventStats });
   } catch (error) {
     console.error(error);
     res

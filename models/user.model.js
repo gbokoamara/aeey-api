@@ -98,6 +98,17 @@ module.exports = {
 
   },
 
+  getUserByEmail: async (email) => {
+    try {
+      const user = await prisma.user.findFirst({where: {email: email}})
+      return user;
+    } catch (error) {
+      console.error("erreur de recuperation de l'utilisateur par numero",error.message)
+      throw error
+    }
+
+  },
+
   getModeratorVote: async (expenseId, moderatorId) => {
     try {
       const existingVote  = await prisma.expenseApproval.findUnique({

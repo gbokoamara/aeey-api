@@ -1,3 +1,4 @@
+const e = require("cors")
 const prisma = require("../utils/prisma")
 
 module.exports = {
@@ -43,9 +44,15 @@ module.exports = {
 
     getAllExpenses: async () => {
         try {
-            const expenses = await prisma.expense.findMany(
-            )
-            return expenses
+            const [expenses, total] = await Promise.all([
+                prisma.expense.findMany(),
+                prisma.expense.aggregate({
+                    _sum: {amount: true}
+                })
+            ])
+
+            const totalAmount  = total._sum.amount || 0
+            return {expenses, totalAmount, total: expenses.length}
         } catch (error) {
             console.error("erreur d'ajout d'evemenent", error.message)
             throw error
@@ -68,9 +75,27 @@ module.exports = {
         try {
             const expense = await prisma.expense.findUnique({
                 where: {id: expenseId},
-                include: { approvals: true}
+                include: { approvals: true, createdBy: true}
             })
             return expense
+        } catch (error) {
+            console.error("erreur d'ajout d'evemenent", error.message)
+            throw error
+        }
+    },
+
+    getApprovalExpenses: async () => {
+        try {
+            const [expenses, totalAmount, total ] = await Promise.all([
+                    prisma.expense.findMany({where: { status: "APPROVED"}}),
+                    prisma.expense.aggregate({where: {status: "APPROVED"}, _sum: {amount: true}}),
+                    prisma.expense.count({where: {status: "APPROVED"}})
+            ])
+            const expenseStats = { 
+                totalAmount: totalAmount._sum.amount || 0,
+                total,
+            }
+            return {expenses, expenseStats}
         } catch (error) {
             console.error("erreur d'ajout d'evemenent", error.message)
             throw error

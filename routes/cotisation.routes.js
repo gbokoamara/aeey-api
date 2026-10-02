@@ -1,13 +1,14 @@
 
 const express = require("express")
-const { addCotisation, updateCotisation, getCotisation, getCotisations, deleteCotisation } = require("../controllers/cotisation.controllers")
+const cotisationController = require("../controllers/cotisation.controllers")
+const protect = require("../middlewares/userMiddleware")
 const router = express.Router()
  
-router.post("/add", addCotisation)
-router.put("/update/:id", updateCotisation)
-router.get("/getcotisation/:id", getCotisation)
-router.get("/getcotisations", getCotisations)
-router.delete("/delete/:id", deleteCotisation)
+router.post("/add", protect, cotisationController.addCotisation)
+router.put("/update/:id", protect, cotisationController.updateCotisation)
+router.get("/getcotisation/:id", cotisationController.getCotisation)
+router.get("/getcotisations", cotisationController.getCotisations)
+router.delete("/delete/:id", protect, cotisationController.deleteCotisation)
 
 
 

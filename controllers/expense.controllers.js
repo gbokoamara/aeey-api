@@ -1,17 +1,21 @@
 // const { logData } = require("../../client/src/utils/console");
 const expenseModel = require("../models/expense.model");
 const userModel = require("../models/user.model");
+const adminModel = require("../models/admin.model")
 const notification = require("../services/expenses/notification");
 const { initPayout } = require("../services/payments/payout");
 const { checkPayout } = require("./webhook.controllers");
+const paymentModel = require("../models/payment.model");
+const { takeFeePercent } = require("../utils/addFeePercent");
 
 
 const addExpense = async (req, res) => {
-    // console.log("expense front client", req.params);
     const addData = req.body.addData;
-    const userId = req.params.userId
-    // console.log("addData", addData)
-    console.log("userId", userId)
+    const user = req.user;
+    const userId = user?.id
+    console.log("req.params.userId", req.params.id)
+    console.log("userId", userId) 
+    console.log("user", user)
 
     try {
         const addPayload = {
@@ -23,8 +27,14 @@ const addExpense = async (req, res) => {
             countryIso: addData.countryIso ,
             amount: addData.amount ? parseInt(addData.amount, 10) : 0,
             method: addData.method,
+            // Utilisateur qui initie le retrait
+            createdById: userId,
         }
-        // console.log("addPayload", addPayload)
+        const {balance} = await adminModel.getManagement()
+        console.log("balance", balance)
+        if (balance < addData.amount) {
+            return res.status(402).json({message: "Désole votre solde est inférieur au motant souhaité"})
+        }
         const expense = await expenseModel.addExpense(addPayload)
 
         const moderators = await userModel.getModerators();
@@ -32,11 +42,7 @@ const addExpense = async (req, res) => {
         const url = process.env.APPROVE_EXPENSE;
         const aprove_url = `${url}/${expense.id}`;
 
-        // console.log("aprove_url", aprove_url)
-        // console.log("moderators", moderators)
-        // console.log("initiator", initiator)
-        // const emails = moderators.map(moderator => moderator.email);
-        // console.log("emails", emails)
+    
         if(initiator.role === "ADMIN") {
            const results =  await notification.withdrawApproveNotif(moderators, initiator, aprove_url)
            console.log("📨 NOTIFICATIONS RESULTS :", results);
@@ -52,7 +58,6 @@ const updateExpense = async (req, res) => {
     const expenseId = req.params.id;
     const user = req.user;
     const userId = user?.id
-    // console.log("updateData", updateData)
     console.log("userId", userId)
     try {
         const updatePayload = {
@@ -64,8 +69,15 @@ const updateExpense = async (req, res) => {
             countryIso: updateData.countryIso ,
             amount: updateData.amount ? parseInt(updateData.amount, 10) : 0,
             method: updateData.method ,
+            // Utilisateur qui initie le retrait
+            createdById: userId,
         }
 
+        const {balance} = await adminModel.getManagement()
+        console.log("balance", balance)
+        if (balance < updateData.amount ) {
+            return res.status(402).json({message: "Désole votre solde est inférieur au motant souhaité"})
+        }
         const expense = await expenseModel.updateExpense(expenseId, updatePayload)
 
         const moderators = await userModel.getModerators();
@@ -92,7 +104,6 @@ const updateExpense = async (req, res) => {
 }
 const getExpense = async (req, res) => {
     const expenseId = req.params.id
-    // logData("expenseId",expenseId)
     try {
         const expense = await expenseModel.getExpense(expenseId)
         res.status(200).json({message:"Opération effectuée avec succès !", expense})
@@ -103,13 +114,22 @@ const getExpense = async (req, res) => {
 }
 const getExpenses = async (req, res) => {
     try {
-        const expenses = await expenseModel.getAllExpenses()
-        res.status(200).json({message:"Opération effectuée avec succès !", expenses})
+        const {expenses, totalAmount, total} = await expenseModel.getAllExpenses()
+        res.status(200).json({message:"Opération effectuée avec succès !", expenses, stats:{totalAmount, total}})
     } catch (error) {
         console.error(error);
         res.status(500).json({message: "erreur serveur"})
     }
 }
+const getApprovedExpenses =  async (req, res) => {
+    try {
+        const {expenses, expenseStats} = await expenseModel.getApprovalExpenses()
+        res.status(200).json({message:"Opération effectuée avec succès !", expenses, expenseStats})
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: "erreur serveur"})
+    }
+};
 const deleteExpense = async (req, res) => {
     const expenseId = req.params.id
     try {
@@ -179,24 +199,41 @@ const approveExpense = async (req, res) => {
 
         // console.log("expense", expense)
         if (newExpenseStatus === "APPROVED") {
+            const amount = expense.amount ? parseInt(expense.amount, 10) : 0;
+            const { payOutFee } = await adminModel.getFee();
+            const newAmount = parseInt(takeFeePercent(amount, payOutFee))
             
             const payoutdata = {
                 countryCode: expense.countryIso ,
                 phone : expense.phoneNumber,
-                amount: expense.amount ? parseInt(expense.amount, 10) : 0,
+                amount: newAmount,
                 withdraw_mode: expense.method ,
             }
-            // console.log("payoutdata", payoutdata)
+
+            // payload de creation de payment
+            const paymentPayload = {
+                phoneNumber : expense.phoneNumber,
+                name: `${expense.createdBy.firstName || ""} ${expense.createdBy.lastName || ""}`.trim(),
+                amount: expense.amount,
+                method : expense.method, 
+                expenseId : expense.id, 
+                type: "WITHDRAW",
+                status: "SUCCESS"
+            }
+            console.log("payoutdata", payoutdata)
 
             const response = await initPayout(payoutdata)
-            // console.log("retrait", response)
+            console.log("response", response)
             const tokenPay = response?.tokenPay
             if (response.statut === true) {
                 if (tokenPay ) {
                     const updateData = {status: newExpenseStatus, tokenPay}
                     await expenseModel.updateExpense(expenseId, updateData)
+                    await paymentModel.addPayment(paymentPayload)
+                    // Mise à jour des stats
+                    await adminModel.decrementBalance(amount)
                 }
-                checkPayout()
+                // checkPayout()
             } else {
                 return res.status(400).json({
                 status: false,
@@ -227,6 +264,9 @@ const rejectExpense = async (req, res) => {
     const ExpenseStatus = [ "APPROVED", "REJECTED", "PROCESSING" , "PAID", ]
     const allowedRoles  = [ "MODERATOR", "ADMIN",]
     try {
+        let treasury = {};
+        let myPayment = {};
+        let myExpense = {}; 
         const moderator = await userModel.getModerator(moderatorId);
         if (!allowedRoles .includes(moderator.role)) {
             return res.status(403).json({
@@ -277,30 +317,46 @@ const rejectExpense = async (req, res) => {
 
         console.log("newExpenseStatus", newExpenseStatus)
         if (newExpenseStatus === "APPROVED") {
+            const amount = expense.amount ? parseInt(expense.amount, 10) : 0;
+            const { payOutFee } = await adminModel.getFee();
+            const newAmount = parseInt(takeFeePercent(amount, payOutFee))
             
             const payoutdata = {
-                countryCode: expense.countryIso ,
+                countryCode: expense.countryIso.toLowerCase() ,
                 phone : expense.phoneNumber,
-                amount: expense.amount ? parseInt(expense.amount, 10) : 0,
+                amount: newAmount,
                 withdraw_mode: expense.method ,
             }
-            // console.log("payoutdata", payoutdata)
             
+            // payload de creation de payment
+            const paymentPayload = {
+                phoneNumber : expense.phoneNumber,
+                name: `${expense.createdBy.firstName || ""} ${expense.createdBy.lastName || ""}`.trim(),
+                amount: expense.amount,
+                method : expense.method, 
+                expenseId : expense.id, 
+                type: "WITHDRAW",
+                status: "SUCCESS"
+            }
+            console.log("payoutdata", payoutdata)
             const response = await initPayout(payoutdata)
-            // console.log("retrait", response)
+            console.log("response", response)
 
             const tokenPay = response?.tokenPay
             if (response.statut === true) {
                 if (tokenPay ) {
                     const updateData = {status: newExpenseStatus, tokenPay}
-                    await expenseModel.updateExpense(expenseId, updateData)
+                    myExpense = await expenseModel.updateExpense(expenseId, updateData)
+                    myPayment = await paymentModel.addPayment(paymentPayload);
+                    // Mise à jour des stats
+                     treasury = await adminModel.decrementBalance(amount)
                 }
-                checkPayout()
+                // checkPayout()
             } else {
                 return res.status(400).json({
                 status: false,
                 vote,
-                result:{ totalModerator, requiredApprovals, approvedCount, rejectedCount, pendingCount, status: newExpenseStatus},
+                result:{ totalModerator, requiredApprovals, approvedCount, rejectedCount, pendingCount, status: newExpenseStatus, treasury, myPayment, myExpense},
                 message: response.message,
                 })
             }
@@ -326,4 +382,5 @@ module.exports = {
     deleteExpense,
     approveExpense,
     rejectExpense,
+    getApprovedExpenses,
 }

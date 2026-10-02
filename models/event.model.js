@@ -43,10 +43,23 @@ module.exports = {
 
     getAllActiveEvents: async () => {
         try {
-            const event = await prisma.event.findMany(
+            const events = await prisma.event.findMany(
                 {where: {isPublished: true}}
             )
-            return event
+            const [total, totalAmount, totalCollected, totalParticipant] = await Promise.all([
+                prisma.event.count({where:{isPublished: true}}),
+                prisma.event.aggregate({_sum: {amount: true}, where:{isPublished: true}}),
+                prisma.event.aggregate({_sum: {collectedAmount: true}}),
+                prisma.event.aggregate({_sum: {participantCount: true}}),
+
+            ])
+            const eventStats = {
+                total,
+                totalAmount: totalAmount._sum.amount || 0,
+                totalCollected: totalCollected._sum.collectedAmount || 0,
+                totalParticipant: totalParticipant._sum.participantCount || 0,
+            }
+            return {events, eventStats}
         } catch (error) {
             console.error("erreur d'ajout d'evemenent", error.message)
             throw error

@@ -4,21 +4,47 @@ const userModel = require("../models/user.model");
 const profil = async(req, res) => {
   const userId = req.params.id
   try {
+    
     const user = await userModel.getProfil(userId);
   res.status(200).json({message:"Utilisateur recuperé avec succès!", user}) 
   } catch (error) {
     res.status(500).json({message: "Erreur de recuperation server", error:error.message})
   }
-}
-const update = async (req, res) => {
-  // logData("update profil :=>", req.body)
-  // logData("updateDate de req.body.updateDate", req.body.updateDate)
+};
 
+const getUserByNumber = async(req, res) => {
+  const number = req.params.number ;
+  const userId = req.user ;
+  console.log("number", number)
+  try {
+
+    // verification
+    const existingUser = await userModel.getProfil(userId) ;
+    if (!existingUser) {
+      return res.status(404).json({message: "Utilisateur introuvable"})
+    } ;
+
+    const member = await userModel.getUserByNumber(number);
+  res.status(200).json({message:"Utilisateur recuperé avec succès!", member}) 
+  } catch (error) {
+    res.status(500).json({message: "Erreur de recuperation server", error:error.message})
+  }
+};
+
+const update = async (req, res) => {
+  const userId = req.user ;
   const updateDate = req.body.updateDate;
   const { id } = req.params;
-    // logData("id", req.params)
+  
 
   try {
+
+    // verification
+    const existingUser = await userModel.getProfil(userId) ;
+    if (!existingUser) {
+      return res.status(404).json({message: "Utilisateur introuvable"})
+    } ;
+
     const updatedUser = await userModel.update(id, {
       firstName: updateDate.firstName,
       lastName: updateDate.lastName,
@@ -55,12 +81,19 @@ const register = (req, res) => {
 };
 
 const memberRequest = async (req, res) => {
-  // logData("req.body.cardData", req.body.cardData)
+  const userId = req.user ;
   let cardData = req.body.cardData
   // logData("cardData", cardData)
 
   const {id} = req.params
   try {
+
+    // verification
+    const existingUser = await userModel.getProfil(userId) ;
+    if (!existingUser) {
+      return res.status(404).json({message: "Utilisateur introuvable"})
+    } ;
+
     const updatePayload = {
             firstName: cardData.firstName,
             lastName: cardData.lastName,
@@ -83,9 +116,12 @@ const memberRequest = async (req, res) => {
             poste: cardData.poste,
             memberType: cardData.memberType,
             profession: cardData.profession,
+            photo: cardData.photo,
             // document: cardData.document, // Attention: Prisma attend un String pour document, vérifie le format
-        };
-    const member = await userModel.update(id, updatePayload)
+    };
+
+    const member = await userModel.update(id, updatePayload) ;
+
     res.status(200).json({message:"demande effectuée avec succès !", status : true, member})
   } catch (error) {
     console.error(error);
@@ -93,4 +129,4 @@ const memberRequest = async (req, res) => {
   }
 };
 
-module.exports = { profil,update, register, memberRequest };
+module.exports = { profil,update, register, memberRequest , getUserByNumber};

@@ -13,13 +13,7 @@ module.exports = {
 
   register: async (data) => {
     try {
-      const user = await prisma.user.create({
-        data: {
-          firstName: data.firstName,
-          number: data.number,
-          memberStatus: "NONE"
-        },
-      });
+      const user = await prisma.user.create({data});
       return user;
     } catch (error) {
       console.error("login error", error.message);

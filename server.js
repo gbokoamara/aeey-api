@@ -44,6 +44,10 @@ app.use("/webhook", webhookRoutes)
 const cloudinaryRoutes = require("./routes/cloudinary.routes");
 app.use("/cloudinary/upload", cloudinaryRoutes)
 
+const adminRoutes = require("./routes/admin.routes");
+app.use("/admin", adminRoutes)
+
+
 // const whatsappService = require("./services/expenses/whatsapp");
 
 const port = process.env.PORT || 9000

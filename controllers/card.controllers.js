@@ -6,42 +6,41 @@ const { buildCardData } = require("../utils/buildCardData");
 
 
 const requestCard = async (req, res) => {
-  // logData("id", req.params.id);
+  const userId = req.user ;
   const id = req.params.id;
   try {
-    const user = await userModel.getUser(id);
-    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
-    // logData("user", user);
+    const user = await userModel.getUser(userId);
+    if (!user) {return res.status(404).json({ message: "Utilisateur introuvable" });}
 
-    // if (user.memberStatus === "PENDING")
-    //   return res.status(403).json({ message: "Membre non approuvé" });
 
-    const existingCard = await cardModel.getCardByUserId(id);
-    if (existingCard) return res.status(409).json({ message: "Carte déjà existante" });
+    if (user.isVerify === false){
+       return res.status(400).json({ message: "Membre non approuvé" });
+    }
+
+    const existingCard = await cardModel.getCardByUserId(user.id);
+    if (existingCard) {
+      return res.status(400).json({ message: "Carte déjà existante" });
+    }
 
     const createPayload = buildCardData(user);
-    // logData("createPayload", createPayload);
 
     const card = await cardModel.create(createPayload);
-    // logData("card créée", card);
 
     return res.status(201).json({ message: "Demande de carte envoyée", card });
 
   } catch (error) {
-    // logData("erreur requestCard", error);
-    return res.status(500).json({ message: "Erreur serveur", error: error.message });
+    return res.status(500).json({ message: error.message || "Erreur serveur" });
   }
 };
 
 const getCard = async (req, res) => {
   const userId = req.params.id
   try {
-    // logData("userId", userId)
     const card = await cardModel.getCardByUserId(userId)
     res.status(200).json({message:"recupération avec succès!", card})
   } catch (error) {
     console.error(error)
-    res.status(500).json({message:"erreur de recupération de la carte"})
+    res.status(500).json({ message: error.message || "Erreur serveur" }); 
   }
 }
 
@@ -51,7 +50,7 @@ const getrequestedCards = async (req, res) => {
     res.status(200).json({message:"succès de recupération des cartes en attente de validation", cards})
   } catch (error) {
     console.error(error)
-    res.status(500).json({message:"erreur de recupération des cartes en attente de validation"})
+    res.status(500).json({ message: error.message || "Erreur serveur" }); 
   }
 }
 

@@ -1,47 +1,76 @@
 // const { logData } = require("../../client/src/utils/console");
+const adminModel = require("../models/admin.model");
 const cardModel = require("../models/card.model");
 const donationModel = require("../models/donation.model");
 const eventModel = require("../models/event.model");
 const paymentModel = require("../models/payment.model");
 
 
+const checkPayment = async (req, res) => {
+   const payment = req.body;
+  try {
+    const result = await paymentModel.processPaymentResult(payment);
+
+    return res.status(200).json({
+      message: result.paid
+        ? "Paiement traité avec succès"
+        : "Paiement non encore confirmé",
+      status: result.success,
+      ...result,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Erreur serveur",
+      error: error.message,
+    });
+  }
+};
+
 const webhook = async (req, res) => {
  try {
-    const webhook = req.body;
-   //  logData("webhook", webhook)
- } catch (error) {
+    const stats = await paymentModel.getPaymentStat();
+    const amount = stats.totalAmount;
+    const treasury = await adminModel.updateTreasury(amount)
     
+    return res.status(200).json({message:'Données retournées avec succès', data: {stats, amount, treasury}})
+ } catch (error) {
+    console.error(error)
+    return res.status(500).json({message: error.message || "Erreur serveur"})
  }
 };
 
-const checkPayment = async (req, res) => {
+const checkPaymentOld = async (req, res) => {
  try {
-    const payment = req.body.payment;
-    const Montant = payment?.Montant;
+    let payment = req.body.payment;
+    let Montant = {};
     const Method = payment?.moyen
     const personalInfo = payment?.personal_Info?.[0];
    //  logData("payment", payment);
-   //  logData("personalInfo", personalInfo);
 
-    const paymentId = personalInfo?.paymentId;
+    let paymentId = personalInfo?.paymentId;
     let myPayment = {}
 
     //  verification de l'existance du paiement dans ma base
     if (paymentId) { myPayment = await paymentModel.getPayment(paymentId)}
-   //  logData("myPayment", myPayment);
+
    //  retourner si le paiement  n'existe pas
     if (!myPayment) {
-    return res.status(404).json({ status: false, message: "Paiement introuvable",});
+    return res.status(403).json({ status: false, message: "Paiement introuvable",});
    }
 
+   if (myPayment.status === "SUCCESS") {
+    return res.status(403).json({ status: false, message: "Paiement déjà succèss !",});
+   }
+
+   Montant = myPayment.amount;
+   paymentId = myPayment.id;
+   
    let paymentData = {}
     if (payment?.statut === "paid") {
-        // je prends 1% de chaque paiement
-        const montantNet = Montant - (Montant * 0.01);
-
-        const updatePayload = {status: "SUCCESS", amount: montantNet, method: Method}
+        const updatePayload = {status: "SUCCESS", amount: Montant, method: Method}
         const updatePayment = await paymentModel.updatePayment(updatePayload, paymentId);
-        paymentData = {...paymentData, updatePayload}
+        paymentData = {...paymentData, updatePayment}
       //   logData("updatePayment", updatePayment)
 
         switch (personalInfo.type) {
@@ -54,7 +83,7 @@ const checkPayment = async (req, res) => {
          }
          case "guest": {
             // mise à jour du don
-            const donUpdatePayload = {status: true, targetAmount: montantNet,}
+            const donUpdatePayload = {status: true, targetAmount: Montant,}
             const donation = await donationModel.updateDonation( donUpdatePayload, myPayment.donationId);
             paymentData = { ...paymentData, donation };
             break;
@@ -64,7 +93,7 @@ const checkPayment = async (req, res) => {
             const event = await eventModel.getEvent(myPayment.eventId);
 
             const eventUpdatePayload = {
-               collectedAmount: (event?.collectedAmount ?? 0) + montantNet,
+               collectedAmount: (event?.collectedAmount ?? 0) + Montant,
                participantCount: (event?.participantCount ?? 0)+ 1,
             };
             const eventUpdated = await eventModel.updateEvent(myPayment.eventId, eventUpdatePayload);

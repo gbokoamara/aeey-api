@@ -1,12 +1,13 @@
 const express = require("express")
-const { profil, update, register, memberRequest } = require("../controllers/user.controllers");
+const { profil, update, register, memberRequest, getUserByNumber } = require("../controllers/user.controllers");
 const protect = require("../middlewares/userMiddleware")
 const router = express.Router()
 
-router.get("/profil/:id", profil);
-router.post("/update-profil/:id", update);
-router.post("/member-request/:id", memberRequest)
-router.post("/", register)
+router.get("/profil/:id", protect, profil);
+router.get("/get-by-number/:number", protect, getUserByNumber)
+router.post("/update-profil/:id", protect, update);
+router.post("/member-request/:id", protect, memberRequest)
+router.post("/", protect, register)
 
 
 module.exports = router
