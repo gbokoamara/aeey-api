@@ -26,7 +26,7 @@ module.exports = {
 
   getUser: async (id) => {
     try {
-      const user = await prisma.user.findUnique({where:{id}, omit : { password: true}})
+      const user = await prisma.user.findUnique({where:{id}})
       return user
     } catch (error) {
       console.error("utilisateur introuvable", error.message);
