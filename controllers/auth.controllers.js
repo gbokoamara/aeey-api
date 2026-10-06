@@ -119,7 +119,7 @@ const   password = async (req, res) => {
 
          return res.status(200).json({message: "Mot de passe ajouté avec succès", tokken,  user: updateUser})
     } catch (error) {
-         return res.status(500).json({message: "Erreur ajout mot de passe ", error: error.message})
+         return res.status(500).json({message: error.message || "Erreur ajout mot de passe ", })
     }
 };
 
@@ -143,7 +143,7 @@ const   passwordLogin = async (req, res) => {
         //  Mot de passe corect
          return res.status(200).json({message: "Mot de passe verifié", isMatch})
     } catch (error) {
-         res.status(500).json({message: "Erreur verification de  mot de passe ", error: error.message})
+         res.status(500).json({message: error.message || "Erreur verification de  mot de passe ",})
     }
 }
 
@@ -196,7 +196,7 @@ const   forgotPassword = async (req, res) => {
     
          res.status(200).json({message: "Lien de réinitialisation généré"})
     } catch (error) {
-       return  res.status(500).json({message: "Erreur modification de  mot de passe ", error: error.message})
+       return  res.status(500).json({message: error.message || "Erreur modification de  mot de passe ", error: error.message})
     }
 }
 
@@ -237,7 +237,7 @@ const resetPassword = async (req, res) => {
         });
 
     } catch (error) {
-        return  res.status(500).json({message: "Erreur de réinitialisé de  mot de passe ", error: error.message})
+        return  res.status(500).json({message: error.message || "Erreur de réinitialisé de  mot de passe ", error: error.message})
 
     }
 };
