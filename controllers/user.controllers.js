@@ -14,7 +14,8 @@ const profil = async(req, res) => {
 
 const getUserByNumber = async(req, res) => {
   const number = req.params.number ;
-  const userId = req.user ;
+  const user = req.user;
+  const userId = user?.id;
   console.log("number", number)
   try {
 
@@ -32,7 +33,8 @@ const getUserByNumber = async(req, res) => {
 };
 
 const update = async (req, res) => {
-  const userId = req.user ;
+  const user = req.user;
+  const userId = user?.id;
   const updateDate = req.body.updateDate;
   const { id } = req.params;
   
@@ -81,7 +83,8 @@ const register = (req, res) => {
 };
 
 const memberRequest = async (req, res) => {
-  const userId = req.user ;
+  const user = req.user;
+  const userId = user?.id ;
   let cardData = req.body.cardData
   // logData("cardData", cardData)
 

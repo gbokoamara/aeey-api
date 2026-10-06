@@ -9,6 +9,45 @@ const {generateToken, generateResetToken} = require("../utils/token")
 
 const login = async (req, res) => {
     const data = req.body.data
+    
+    try {
+        // Vérification du numéro
+        const number = normalizePhone(data.number);
+
+        if (!number) {
+            return res.status(400).json({
+                message: "Le numéro de téléphone doit contenir au moins 8 chiffres."
+            });
+        }
+        
+        // connexion
+        let token = {};
+        let user = await authModel.login(number)
+         
+        // si user n'existe pas → on crée un compte
+        if (!user) {
+            return res.status(400).json({
+                message: "L'utilisateur ne dispose pas encore de compte, veuillez vous inscrire !"
+            });
+        }
+
+        // generer le token 
+        if (user) { token = await generateToken(user);}
+
+        if (!token) {
+            return res.status(401).json({message: "Token manquant !"})
+        };
+
+        return res.status(201).json({message:"Connexion succès !", user, token})
+
+    } catch (error) {
+        console.log("error", error)
+        return res.status(500).json({message: error.message || "error login"})
+    }
+}
+
+const   register = async (req, res) => {
+    const data = req.body.data
     console.log("data", data)
     
     try {
@@ -27,29 +66,32 @@ const login = async (req, res) => {
             countryCode: data.countryCode,
             countryIso: data.countryIso,
         }
-        // connexion
-        let token = {};
+         
         let user = await authModel.login(number)
          
         // si user n'existe pas → on crée un compte
-        if (!user) {
-            console.log("registerData", registerData)
-            user =  await authModel.register(registerData)
+        if (user) {
+            return res.status(400).json({
+                message: " Vous avez déjà un compte, veuillez vous connecter !"
+            });
         }
+        
+        // console.log("registerData", registerData)
+        user =  await authModel.register(registerData)
 
         // generer le token 
         if (user) { token = await generateToken(user);}
-        // console.log("token", token)
-        // console.log("user", user)
-        return res.status(201).json({message:"success login", user, token})
+
+        if (!token) {
+            return res.status(401).json({message: "Token manquant !"})
+        };
+        
+        return res.status(201).json({message:"Compte creé avec succès et connexion reussie !", user, token})
+
     } catch (error) {
         console.log("error", error)
-        return res.status(500).json({message: error.message || "error login"})
+        return res.status(500).json({message: error.message || "register login"})
     }
-}
-
-const   register = (req, res) => {
-    res.send("enregistrement en cours ...")
 }
 
 const   password = async (req, res) => {
@@ -59,11 +101,11 @@ const   password = async (req, res) => {
 
         const user = await authModel.getUser(id);
         if (!user) {
-            res.status(404).json({message: "Aucun utilisateur trouvé"})
+            return res.status(404).json({message: "Aucun utilisateur trouvé"})
         }
 
         if (user.havePass) {
-            res.status(400).json({message: "Mot de passe déjà défini"})
+            return res.status(400).json({message: "Mot de passe déjà défini"})
         }
 
         const hashedPassword = await hashePassword(password);
@@ -75,9 +117,9 @@ const   password = async (req, res) => {
 
          const tokken = generateToken(updateUser);
 
-         res.status(200).json({message: "Mot de passe ajouté avec succès", tokken,  user: updateUser})
+         return res.status(200).json({message: "Mot de passe ajouté avec succès", tokken,  user: updateUser})
     } catch (error) {
-         res.status(500).json({message: "Erreur ajout mot de passe ", error: error.message})
+         return res.status(500).json({message: "Erreur ajout mot de passe ", error: error.message})
     }
 };
 

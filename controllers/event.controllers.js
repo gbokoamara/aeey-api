@@ -1,10 +1,20 @@
 // const { logData } = require("../../client/src/utils/console");
 const eventModel = require("../models/event.model");
+const userModel = require("../models/user.model");
 
 const addEvent = async (req, res) => {
-  // logData("event front client", req.body);
   const addData = req.body.addData;
+  
+  const user = req.user;
+  const userId = user?.id
+
   try {
+    // verification user
+    const existingUser = userModel.getProfil(userId) ;
+    if (!existingUser) {
+      return res.status(404).json({message: "Aucun utilisateur trouvé, veuillez vous connecter !"})
+    } ;
+
     const addPayload = {
       title: addData.title,
       description: addData.description,
@@ -22,12 +32,19 @@ const addEvent = async (req, res) => {
 };
 
 const updateEvent = async (req, res) => {
-  // logData("event front client", req.body);
+  
   const updateData = req.body.updateData;
   const eventId = req.params.id;
-  // logData("eventId front client", eventId);
+  const user = req.user;
+  const userId = user?.id;
 
   try {
+    // verification user
+    const existingUser = userModel.getProfil(userId) ;
+    if (!existingUser) {
+      return res.status(404).json({message: "Aucun utilisateur trouvé, veuillez vous connecter !"})
+    } ;
+
     const updatePayload = {
       title: updateData.title,
       description: updateData.description,
@@ -47,36 +64,47 @@ const updateEvent = async (req, res) => {
 };
 
 const publishEvent = async (req, res) => {
-  // logData("event front client", req.body);
   const {isPublished} = req.body
   const eventId = req.params.id;
-  // logData("eventId front client", eventId);
+  const user = req.user;
+  const userId = user?.id;
 
   // Sécurité : vérifier si l'ID est présent
   if (!eventId) {
     return res.status(400).json({ message: "ID de l'événement manquant" });
   }
 
-
   try {
+    // verification user
+    const existingUser = userModel.getProfil(userId) ;
+    if (!existingUser) {
+      return res.status(404).json({message: "Aucun utilisateur trouvé, veuillez vous connecter !"})
+    } ;
+
     const updatePayload = {
       isPublished: isPublished,
     };
+
     const event = await eventModel.updateEvent(eventId, updatePayload);
-    res.status(200).json({ message: "Evenement modifié avec succès !", event });
+    return res.status(200).json({ message: "Evenement modifié avec succès !", event });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la modification de l'evenement" });
+    return res.status(500).json({ message: error.message || "Erreur lors de la modification de l'evenement" });
   }
 };
 
 const deleteEvent = async (req, res) => {
   const eventId = req.params.id;
-  // logData("eventId front client", eventId);
+  const user = req.user;
+  const userId = user?.id;
 
   try {
+    // verification user
+    const existingUser = userModel.getProfil(userId) ;
+    if (!existingUser) {
+      return res.status(404).json({message: "Aucun utilisateur trouvé, veuillez vous connecter !"})
+    } ;
+
     await eventModel.deleteEvent(eventId);
     res.status(200).json({ message: "Evenement supprimé avec succès !" });
   } catch (error) {

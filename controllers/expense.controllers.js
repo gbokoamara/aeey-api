@@ -11,13 +11,18 @@ const { takeFeePercent } = require("../utils/addFeePercent");
 
 const addExpense = async (req, res) => {
     const addData = req.body.addData;
+    
     const user = req.user;
     const userId = user?.id
-    console.log("req.params.userId", req.params.id)
-    console.log("userId", userId) 
-    console.log("user", user)
+    
 
     try {
+        // verification
+            const existingUser = await userModel.getProfil(userId) ;
+            if (!existingUser) {
+              return res.status(404).json({message: "Utilisateur introuvable"})
+            } ;
+
         const addPayload = {
             name: addData.name ,
             description: addData.description ,
@@ -31,7 +36,7 @@ const addExpense = async (req, res) => {
             createdById: userId,
         }
         const {balance} = await adminModel.getManagement()
-        console.log("balance", balance)
+        // console.log("balance", balance)
         if (balance < addData.amount) {
             return res.status(402).json({message: "Désole votre solde est inférieur au motant souhaité"})
         }
@@ -58,8 +63,15 @@ const updateExpense = async (req, res) => {
     const expenseId = req.params.id;
     const user = req.user;
     const userId = user?.id
-    console.log("userId", userId)
+    
+
     try {
+        // verification
+            const existingUser = await userModel.getProfil(userId) ;
+            if (!existingUser) {
+              return res.status(404).json({message: "Utilisateur introuvable"})
+            } ;
+
         const updatePayload = {
             name : updateData.name,
             description : updateData.description,
@@ -74,7 +86,7 @@ const updateExpense = async (req, res) => {
         }
 
         const {balance} = await adminModel.getManagement()
-        console.log("balance", balance)
+        // console.log("balance", balance)
         if (balance < updateData.amount ) {
             return res.status(402).json({message: "Désole votre solde est inférieur au motant souhaité"})
         }
@@ -132,7 +144,16 @@ const getApprovedExpenses =  async (req, res) => {
 };
 const deleteExpense = async (req, res) => {
     const expenseId = req.params.id
+    const user = req.user;
+    const userId = user?.id
+    
     try {
+        // verification
+         const existingUser = await userModel.getProfil(userId) ;
+         if (!existingUser) {
+          return res.status(404).json({message: "Utilisateur introuvable"})
+        } ;
+    
         await expenseModel.deleteExpense(expenseId)
         res.status(200).json({message:"Opération effectuée avec succès !"})
     } catch (error) {
@@ -144,11 +165,18 @@ const deleteExpense = async (req, res) => {
 const approveExpense = async (req, res) => {
     const expenseId = req.params.id;
     const moderatorId = req.user.id;
-    // console.log("expenseId", expenseId)
-    // console.log("moderatorId", moderatorId)
+    const user = req.user;
+    const userId = user?.id
     const ExpenseStatus = [ "APPROVED", "REJECTED", "PROCESSING" , "PAID", ];
     const allowedRoles  = [ "MODERATOR", "ADMIN",];
     try {
+
+        // verification
+        const existingUser = await userModel.getProfil(userId) ;
+        if (!existingUser) {
+          return res.status(404).json({message: "Utilisateur introuvable"})
+        } ;
+
         const moderator = await userModel.getModerator(moderatorId);
         if (!allowedRoles .includes(moderator.role)) {
             return res.status(403).json({
@@ -259,11 +287,18 @@ const approveExpense = async (req, res) => {
 const rejectExpense = async (req, res) => {
     const expenseId = req.params.id;
     const moderatorId = req.user.id;
-    // console.log("expenseId", expenseId)
-    // console.log("moderatorId", moderatorId)
+    const user = req.user;
+    const userId = user?.id
     const ExpenseStatus = [ "APPROVED", "REJECTED", "PROCESSING" , "PAID", ]
     const allowedRoles  = [ "MODERATOR", "ADMIN",]
     try {
+
+        // verification
+        const existingUser = await userModel.getProfil(userId) ;
+        if (!existingUser) {
+          return res.status(404).json({message: "Utilisateur introuvable"})
+        } 
+
         let treasury = {};
         let myPayment = {};
         let myExpense = {}; 

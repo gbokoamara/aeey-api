@@ -6,7 +6,8 @@ const { buildCardData } = require("../utils/buildCardData");
 
 
 const requestCard = async (req, res) => {
-  const userId = req.user ;
+  const user = req.user;
+  const userId = user?.id
   const id = req.params.id;
   try {
     const user = await userModel.getUser(userId);

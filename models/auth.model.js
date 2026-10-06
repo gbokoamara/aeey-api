@@ -3,7 +3,10 @@ const prisma = require("../utils/prisma");
 module.exports = {
   login: async (number) => {
     try {
-      const user = await prisma.user.findUnique({ where: { number } });
+      const user = await prisma.user.findUnique({ 
+        where: { number } ,
+        omit : { password: true}
+      });
       return user;
     } catch (error) {
       console.error("login error", error.message);
@@ -13,17 +16,17 @@ module.exports = {
 
   register: async (data) => {
     try {
-      const user = await prisma.user.create({data});
+      const user = await prisma.user.create({data, omit : { password: true}});
       return user;
     } catch (error) {
-      console.error("login error", error.message);
+      console.error("register error", error.message);
       throw error;
     }
   },
 
   getUser: async (id) => {
     try {
-      const user = await prisma.user.findUnique({where:{id}})
+      const user = await prisma.user.findUnique({where:{id}, omit : { password: true}})
       return user
     } catch (error) {
       console.error("utilisateur introuvable", error.message);
@@ -35,7 +38,8 @@ module.exports = {
     try {
       const updatedUser = await prisma.user.update({
       where:{id},
-      data: data
+      data: data,
+      omit : { password: true}
     })
     return updatedUser;
     } catch (error) {
@@ -56,7 +60,7 @@ module.exports = {
       });
       return user;
     } catch (error) {
-      console.error("login error", error.message);
+      console.error("create admin  error", error.message);
       throw error;
     }
   },
@@ -70,10 +74,11 @@ module.exports = {
           lastName: data.lastName,
           role: "MODERATOR",
         },
+        omit : { password: true}
       });
       return user;
     } catch (error) {
-      console.error("login error", error.message);
+      console.error("create moderator error", error.message);
       throw error;
     }
   },

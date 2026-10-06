@@ -2,13 +2,14 @@
 const express = require("express")
 const cotisationController = require("../controllers/cotisation.controllers")
 const protect = require("../middlewares/userMiddleware")
+const rateLimitHelper = require("../middlewares/rateLimit")
 const router = express.Router()
  
-router.post("/add", protect, cotisationController.addCotisation)
-router.put("/update/:id", protect, cotisationController.updateCotisation)
-router.get("/getcotisation/:id", cotisationController.getCotisation)
 router.get("/getcotisations", cotisationController.getCotisations)
-router.delete("/delete/:id", protect, cotisationController.deleteCotisation)
+router.get("/getcotisation/:id", cotisationController.getCotisation)
+router.post("/add", rateLimitHelper(), protect, cotisationController.addCotisation)
+router.put("/update/:id", rateLimitHelper(), protect, cotisationController.updateCotisation)
+router.delete("/delete/:id", rateLimitHelper(), protect, cotisationController.deleteCotisation)
 
 
 

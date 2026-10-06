@@ -8,6 +8,8 @@ const {
   deleteEvent,
   publishEvent,
 } = require("../controllers/event.controllers");
+const protect = require("../middlewares/userMiddleware");
+const rateLimitHelper = require("../middlewares/rateLimit");
 const router = express.Router();
 
 // GET
@@ -16,10 +18,10 @@ router.get("/get-all-events", getAllEvents);
 router.get("/get-event/:id", getEvent);
 
 // ADD
-router.post("/add", addEvent);
-router.put("/update/:id", updateEvent);
-router.put("/publish/:id", publishEvent);
+router.post("/add", rateLimitHelper(), protect, addEvent);
+router.put("/update/:id", rateLimitHelper(), protect, updateEvent);
+router.put("/publish/:id", rateLimitHelper(), protect, publishEvent);
 // DELETE
-router.delete("/delete/:id", deleteEvent);
+router.delete("/delete/:id", rateLimitHelper(), protect, deleteEvent);
 
 module.exports = router;

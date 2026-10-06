@@ -13,16 +13,18 @@ const {
     getApprovedExpenses,
 } = require("../controllers/expense.controllers")
 const protect = require("../middlewares/userMiddleware")
+const rateLimitHelper = require("../middlewares/rateLimit")
 
-router.post("/add/:id", protect, addExpense)
-router.put("/update/:id", protect, updateExpense)
 router.get("/get-expense/:id", getExpense )
 router.get("/get-all-expenses", getExpenses )
 router.get("/get-approved-expenses", getApprovedExpenses )
-router.delete("/delete/:id", protect, deleteExpense)
 
-router.post("/approve/:id", protect, approveExpense) 
-router.post("/reject/:id", protect, rejectExpense) 
+router.post("/add/:id", rateLimitHelper(), protect, addExpense)
+router.put("/update/:id", rateLimitHelper(), protect, updateExpense)
+router.delete("/delete/:id", rateLimitHelper(), protect, deleteExpense)
+
+router.post("/approve/:id", rateLimitHelper(), protect, approveExpense) 
+router.post("/reject/:id", rateLimitHelper(), protect, rejectExpense) 
 
 
 module.exports = router
