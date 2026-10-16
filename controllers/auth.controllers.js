@@ -5,6 +5,7 @@ const notification = require("../services/expenses/notification")
 const { sendOtp } = require("../services/expenses/notification")
 const { normalizePhone } = require("../utils/memberNumber")
 const {hashePassword, comparePassword} = require("../utils/password")
+const registerUtils = require("../utils/registerUtils")
 const {generateToken, generateResetToken} = require("../utils/token")
 
 const login = async (req, res) => {
@@ -51,7 +52,19 @@ const   register = async (req, res) => {
     console.log("data", data)
     
     try {
-        // Vérification du numéro
+
+        // 1. Nom et prénom
+        const fullName = registerUtils.splitName(data.name);
+
+        if (!fullName) {
+            return res.status(400).json({
+                message: "Veuillez saisir votre nom et votre prénom."
+            });
+        }
+
+        const { firstName, lastName } = fullName;
+
+        // 2. Numéro de téléphone
         const number = normalizePhone(data.number);
 
         if (!number) {
@@ -60,7 +73,15 @@ const   register = async (req, res) => {
             });
         }
 
+        if (registerUtils.isFakeNumber(number)) {
+            return res.status(400).json({
+                message: "Ce numéro de téléphone n'est pas valide."
+            });
+        }
+
         const registerData = {
+            firstName ,
+            lastName ,
             number,
             countryName: data.countryName,
             countryCode: data.countryCode,

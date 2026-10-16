@@ -244,9 +244,10 @@ const getPayment = async (req,res) => {
     }
 };
 const getAllPayments= async (req,res) => {
-
+  const { page, limit } = req.query;
+  // console.log("limit", limit)
     try {
-        const {payments, paymentStats} = await paymentModel.getAllPayments()
+        const {payments, paymentStats} = await paymentModel.getAllPayments({ page, limit })
         res.status(200).json({message:"Opération reussi avec succès!", payments, paymentStats})
     } catch (error) {
         res.status(500).json({message:"Erreur seuveur"})
@@ -255,9 +256,10 @@ const getAllPayments= async (req,res) => {
 
 const getUserPayments= async (req,res) => {
     const userId = req.params.id;
+    const { page, limit } = req.query;
     // console.log("userId", userId)
     try {
-        const payments = await paymentModel.getUserPayments(userId)
+        const payments = await paymentModel.getUserPayments(userId, { page, limit })
         res.status(200).json({message:"Opération reussi avec succès!", payments})
     } catch (error) {
         res.status(500).json({message:"Erreur seuveur", error: error.message})

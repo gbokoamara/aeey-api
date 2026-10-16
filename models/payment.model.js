@@ -1,3 +1,4 @@
+const { paginate } = require("../utils/paginate");
 const prisma = require("../utils/prisma");
 const adminModel = require("./admin.model");
 const cardModel = require("./card.model");
@@ -48,15 +49,26 @@ module.exports = {
             throw error
         }
     },
-    getAllPayments: async () => {
+    getAllPayments: async ({ page, limit }) => {
         try {
-            const [ payments, totalAmount, total, 
+            const where = { status: "SUCCESS" }
+
+            const payments = await prisma.payment.findMany({
+                where,
+                orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+                ...paginate(page, limit),
+            })
+
+            // pages suivantes : seulement la liste, pas de statistiques
+            if (page && Number(page) > 1) return { payments };
+
+            const [  totalAmount, total, 
                     cardTotalAmount, evntTotalAmount, 
                     donTotalAmount, withdrawTotalAmount, 
                     cotisationTotalAmount, terceTotalAmount,
                     serviceTotalAmount ] =
                 await Promise.all([
-                    prisma.payment.findMany({where: {status:  "SUCCESS"}}),
+                    
                     prisma.payment.aggregate({where: {status: "SUCCESS"}, _sum:{amount:true}}),
                     prisma.payment.count({where: {status: "SUCCESS"}}),
                     prisma.payment.aggregate({where: {status: "SUCCESS", type: "CARTE"}, _sum:{amount:true}}),
@@ -84,12 +96,14 @@ module.exports = {
             throw error
         }
     },
-    getUserPayments: async (userId) => {
+    getUserPayments: async (userId , { page, limit }) => {
         try {
             const payments = await prisma.payment.findMany({
                 where: {
                 userId: userId,
-                status:  "SUCCESS"
+                status:  "SUCCESS",
+                orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+                ...paginate(page, limit),
             },
             })
             return payments

@@ -86,6 +86,7 @@ const memberRequest = async (req, res) => {
   const user = req.user;
   const userId = user?.id ;
   let cardData = req.body.cardData
+  const memberEmail = cardData.email;
   // logData("cardData", cardData)
 
   const {id} = req.params
@@ -95,6 +96,11 @@ const memberRequest = async (req, res) => {
     const existingUser = await userModel.getProfil(userId) ;
     if (!existingUser) {
       return res.status(404).json({message: "Utilisateur introuvable"})
+    } ;
+
+    const existingEmail = await userModel.getUserByEmail(memberEmail)
+    if (existingEmail) {
+      return res.status(400).json({message: "Email dejà  utilisé !"})
     } ;
 
     const updatePayload = {
@@ -125,7 +131,7 @@ const memberRequest = async (req, res) => {
 
     const member = await userModel.update(id, updatePayload) ;
 
-    res.status(200).json({message:"demande effectuée avec succès !", status : true, member})
+    res.status(200).json({message:"demande effectuée avec succès !", status : true, role: member.role,  member})
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erreur lors de la demande d'adhésion" });
