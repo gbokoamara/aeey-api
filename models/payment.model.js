@@ -102,9 +102,9 @@ module.exports = {
                 where: {
                 userId: userId,
                 status:  "SUCCESS",
-                orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-                ...paginate(page, limit),
             },
+            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+            ...paginate(page, limit),
             })
             return payments
         } catch (error) {
